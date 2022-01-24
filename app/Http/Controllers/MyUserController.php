@@ -35,10 +35,16 @@ class MyUserController extends Controller
      */
     public function store(Request $request)
     {
-        if($request['action'] == 'signup')
+        switch ($request['action'])
         {
-
+            case 'login':
+                var_dump('login');
+                break;
+            case 'signup':
+                return $this->createMyUser($request);
+                break;
         }
+
     }
 
     /**
@@ -84,5 +90,19 @@ class MyUserController extends Controller
     public function destroy(MyUser $myUser)
     {
         //
+    }
+
+
+    private function createMyUser(Request $request)
+    {
+        $user = MyUser::where('email', $request['email'])->first();
+        if(empty($user))
+        {
+            MyUser::create($request->all());
+            return redirect()->route('users.index')
+                ->with('success','New user created successfully.');
+        } else {
+            return redirect()->back()->withErrors('User with email "' . $request['email'] . '"" exists');
+        }
     }
 }
