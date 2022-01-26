@@ -2,11 +2,26 @@
 
 namespace App\Http\Controllers;
 
+use App\Interfaces\UserInterface;
 use App\Models\MyUser;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 
 class MyUserController extends Controller
 {
+
+    private $userInterface;
+
+    /**
+     * MyUserController constructor.
+     * @param UserInterface $userInterface
+     */
+    public function __construct(UserInterface $userInterface)
+    {
+        $this->userInterface = $userInterface;
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -41,7 +56,7 @@ class MyUserController extends Controller
                 var_dump('login');
                 break;
             case 'signup':
-                return $this->createMyUser($request);
+                return $this->userInterface->createUser($request);
                 break;
         }
 
@@ -95,14 +110,17 @@ class MyUserController extends Controller
 
     private function createMyUser(Request $request)
     {
-        $user = MyUser::where('email', $request['email'])->first();
-        if(empty($user))
-        {
-            MyUser::create($request->all());
-            return redirect()->route('users.index')
-                ->with('success','New user created successfully.');
-        } else {
-            return redirect()->back()->withErrors('User with email "' . $request['email'] . '"" exists');
-        }
+        $myUser = new MyUser();
+        $userService = new UserService($request);
+        $userService->createUser($myUser);
+//        $user = MyUser::where('email', $request['email'])->first();
+//        if(empty($user))
+//        {
+//            MyUser::create($request->all());
+//            return redirect()->route('users.index')
+//                ->with('success','New user created successfully.');
+//        } else {
+//            return redirect()->back()->withErrors('User with email "' . $request['email'] . '"" exists');
+//        }
     }
 }
