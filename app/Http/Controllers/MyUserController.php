@@ -4,13 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Interfaces\UserInterface;
 use App\Models\MyUser;
-use App\Services\UserService;
 use Illuminate\Http\Request;
 
 class MyUserController extends Controller
 {
 
-    private $userInterface;
+    private UserInterface $userInterface;
 
     /**
      * MyUserController constructor.
@@ -53,10 +52,10 @@ class MyUserController extends Controller
         switch ($request['action'])
         {
             case 'login':
-                var_dump('login');
+                return $this->loginUser($request);
                 break;
             case 'signup':
-                return $this->userInterface->createUser($request);
+                return $this->registerMyUser($request);
                 break;
         }
 
@@ -108,19 +107,25 @@ class MyUserController extends Controller
     }
 
 
-    private function createMyUser(Request $request)
+    private function registerMyUser(Request $request)
     {
-        $myUser = new MyUser();
-        $userService = new UserService($request);
-        $userService->createUser($myUser);
-//        $user = MyUser::where('email', $request['email'])->first();
-//        if(empty($user))
-//        {
-//            MyUser::create($request->all());
-//            return redirect()->route('users.index')
-//                ->with('success','New user created successfully.');
-//        } else {
-//            return redirect()->back()->withErrors('User with email "' . $request['email'] . '"" exists');
-//        }
+        try {
+            $this->userInterface->registerUser($request);
+            return redirect()->route('users.index')
+                ->with('success','New user created successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+    }
+
+    private function loginUser($request)
+    {
+        try {
+            $user = $this->userInterface->loginUser($request);
+
+            return redirect()->route('users.account')->with(['user' => $user]);
+        } catch (\Exception $e){
+            return redirect()->back()->withErrors($e->getMessage());
+        }
     }
 }

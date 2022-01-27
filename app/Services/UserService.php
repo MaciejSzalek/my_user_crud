@@ -6,17 +6,49 @@ namespace App\Services;
 
 use App\Interfaces\UserInterface;
 use App\Models\MyUser;
+use App\Repositories\UserRepository;
+use \Exception;
 
 class UserService implements UserInterface
 {
-    private $myUser;
+    /**
+     * @var UserRepository
+     */
+    private UserRepository $userRepository;
 
     /**
      * UserService constructor.
+     * @param UserRepository $userRepository
      */
-    public function __construct()
+    public function __construct(UserRepository $userRepository)
     {
-        $this->myUser = new MyUser();
+        $this->userRepository = $userRepository;
+    }
+
+    public function loginUser($request)
+    {
+        $user = MyUser::where('email', $request['email'])->where('password', $request['password'])->first();
+        if(empty($user))
+        {
+            throw new Exception("Incorrect email or password");
+        }
+        return $user;
+    }
+
+    public function registerUser($request)
+    {
+        if(!filter_var($request['email'], FILTER_VALIDATE_EMAIL))
+        {
+            throw new Exception("Invalid email address");
+        }
+
+        $user = $this->userRepository->findByEmail($request['email']);
+        if(empty($user))
+        {
+            $this->userRepository->add($request->all());
+        } else {
+            throw new Exception('User with email "' . $request['email'] . '"" exists');
+        }
     }
 
     public function updateUser($request)
@@ -24,26 +56,9 @@ class UserService implements UserInterface
 
     }
 
-    public function showUser($request)
-    {
-
-    }
-
     public function deleteUser($request)
     {
-
-    }
-
-    public function createUser($request)
-    {
-        $user = MyUser::where('email', $request['email'])->first();
-        if(empty($user))
-        {
-            MyUser::create($request->all());
-            return redirect()->route('users.index')
-                ->with('success','New user created successfully.');
-        } else {
-            return redirect()->back()->withErrors('User with email "' . $request['email'] . '"" exists');
-        }
+        //validacja itp.
+        $this->userRepository->delete($request['id']);
     }
 }
