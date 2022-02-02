@@ -4,14 +4,11 @@
 namespace App\Interfaces;
 
 
-use App\Models\MyUser;
-
 interface RepositoryInterface
 {
-    public function add(array $data): void;
+    public function add(array $data);
     public function get(int $id);
-    public function update(int $id, array $data): void;
-    public function delete(int $id): void;
+    public function update(int $id, array $data);
+    public function delete(int $id);
     public function findByEmail(string $email);
-    public function findByEmailPassword(string $email, string $password);
 }

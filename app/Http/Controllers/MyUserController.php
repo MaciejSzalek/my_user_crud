@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Interfaces\UserInterface;
-use App\Models\MyUser;
 use Illuminate\Http\Request;
 
 class MyUserController extends Controller
@@ -28,6 +27,7 @@ class MyUserController extends Controller
      */
     public function index()
     {
+        \session(['login' => false]);
         return view('MyUser.index');
     }
 
@@ -54,63 +54,87 @@ class MyUserController extends Controller
             case 'login':
                 return $this->loginUser($request);
                 break;
+            case 'logout':
+                return $this->logoutUser();
+                break;
             case 'signup':
                 return $this->registerMyUser($request);
                 break;
         }
-
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\MyUser  $myUser
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function show(MyUser $myUser)
+    public function show(int $id)
     {
-        //
+        if(\session('login'))
+        {
+            $myUser = $this->userInterface->getUser($id);
+            return view('MyUser.account', ['user' => $myUser]);
+        }
+        return redirect()->route('users.index')->with('error', 'User not login');
+
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\MyUser  $myUser
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function edit(MyUser $myUser)
+    public function edit(Request $request)
     {
-
+        try {
+            $this->userInterface->updateUser($request->all());
+            return redirect()->route('users.show', $request['id'])
+                ->with('success','User edited successfully.');
+        } catch (\Exception $e){
+            return redirect()->back()->withErrors($e->getMessage());
+        }
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\MyUser  $myUser
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, MyUser $myUser)
+    public function update(Request $request)
     {
-        //
+        try {
+            $this->userInterface->updateUser($request->all());
+        } catch (\Exception $e){
+            return redirect()->back()->withErrors($e->getMessage());
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\MyUser  $myUser
+     * @param Request $request
      * @return \Illuminate\Http\Response
      */
-    public function destroy(MyUser $myUser)
+    public function destroy(Request $request)
     {
-        //
+        try {
+            return redirect()->route('users.index')
+                ->with('success','User "' . $request['email'] . '" deleted successfully"');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors($e->getMessage());
+        }
+
+        return null;
     }
 
 
     private function registerMyUser(Request $request)
     {
         try {
-            $this->userInterface->registerUser($request);
+            $this->userInterface->registerUser($request->all());
             return redirect()->route('users.index')
                 ->with('success','New user created successfully.');
         } catch (\Exception $e) {
@@ -122,10 +146,20 @@ class MyUserController extends Controller
     {
         try {
             $user = $this->userInterface->loginUser($request);
-
-            return redirect()->route('users.account')->with(['user' => $user]);
+            if(session('login'))
+            {
+                return redirect()->route('users.show', $user->id);
+            }
+            return redirect()->route('users.index');
         } catch (\Exception $e){
             return redirect()->back()->withErrors($e->getMessage());
         }
+    }
+
+    private function logoutUser()
+    {
+        session(['login' => false]);
+        return redirect()->route('users.index')
+            ->with('success','User logout');
     }
 }

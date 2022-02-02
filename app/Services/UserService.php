@@ -5,7 +5,6 @@ namespace App\Services;
 
 
 use App\Interfaces\UserInterface;
-use App\Models\MyUser;
 use App\Repositories\UserRepository;
 use \Exception;
 
@@ -27,12 +26,19 @@ class UserService implements UserInterface
 
     public function loginUser($request)
     {
-        $user = MyUser::where('email', $request['email'])->where('password', $request['password'])->first();
+        $user = $this->userRepository->findByEmail($request['email']);
+
         if(empty($user))
         {
             throw new Exception("Incorrect email or password");
         }
-        return $user;
+
+        if($request['password'] == $user->password){
+            \session(['login' => true]);
+            return $this->getUser($user->id);
+        } else {
+            throw new Exception("Incorrect email or password");
+        }
     }
 
     public function registerUser($request)
@@ -45,7 +51,7 @@ class UserService implements UserInterface
         $user = $this->userRepository->findByEmail($request['email']);
         if(empty($user))
         {
-            $this->userRepository->add($request->all());
+            $this->userRepository->add($request);
         } else {
             throw new Exception('User with email "' . $request['email'] . '"" exists');
         }
@@ -53,12 +59,21 @@ class UserService implements UserInterface
 
     public function updateUser($request)
     {
-
+        $data = [
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'password' => $request['password']
+        ];
+        $this->userRepository->update($request['id'], $data);
     }
 
     public function deleteUser($request)
     {
-        //validacja itp.
         $this->userRepository->delete($request['id']);
+    }
+
+    public function getUser(int $id)
+    {
+        return $this->userRepository->get($id);
     }
 }

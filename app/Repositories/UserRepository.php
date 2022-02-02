@@ -15,23 +15,23 @@ class UserRepository implements RepositoryInterface
         MyUser::create($data);
     }
 
-    public function get(int $id): MyUser
+    public function get(int $id)
     {
         return MyUser::where('id', $id)->first();
     }
 
-    public function update(int $id, array $data): void
+    public function update(int $id, array $data)
     {
-        MyUser::where('id', $id)->update($data);
+        return MyUser::where('id', $id)->update($data);
     }
 
-    public function delete(int $id): void
+    public function delete(int $id)
     {
-        MyUser::where('id', $id)->delete();
+        return MyUser::where('id', $id)->delete();
     }
 
-    public function findByEmail(string $email): MyUser
+    public function findByEmail(string $email)
     {
-        return MyUser::where('email')->first();
+        return MyUser::where('email', $email)->first();
     }
 }

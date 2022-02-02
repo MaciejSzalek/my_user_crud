@@ -18,19 +18,21 @@
         </div>
     @endif
 
-    <form action="{{ route('users.edit')}}" method="POST">
+    <form action="{{ route('users.edit', $user->id)}}">
         @csrf
-
         <div class="back">
             <div class="div-center">
                 <div class="content">
                     <h3>Account</h3>
-                    {{Session::get('user')}}
                     <hr />
                     <div class="form-group" hidden>
                         <label>
                             <input type="text" class="form-control" name="action" value="edit">
                         </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="id">User ID</label>
+                        <input type="text" class="form-control" name="id" id="id" value="{{$user->id}}" readonly>
                     </div>
                     <div class="form-group">
                         <label for="name">User Name</label>
@@ -44,12 +46,18 @@
                         <label for="password">Password</label>
                         <input type="password" class="form-control" name="password" placeholder="password" required value="{{$user->password}}">
                     </div>
-                    <button type="submit" class="btn btn-primary">Confirm</button>
-                    <hr />
-                    <a class="" href="{{ route('users.index') }}">Logout</a>
+                    <button type="submit" class="btn btn-primary">Edit Account</button>
                 </div>
             </div>
         </div>
+    </form>
+
+    <form action="{{ route('users.store')}}">
+        <label>
+            <input type="text" class="form-control" name="action" value="logout" hidden>
+        </label>
+        <br>
+        <button type="submit" class="btn btn-danger">Logout</button>
     </form>
 
 @endsection
