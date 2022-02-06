@@ -52,7 +52,7 @@
         </div>
     </form>
 
-    <form action="{{ route('users.store')}}">
+    <form action="{{ route('users.store')}}" method="post">
         <label>
             <input type="text" class="form-control" name="action" value="logout" hidden>
         </label>

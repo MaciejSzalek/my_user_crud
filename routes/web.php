@@ -19,3 +19,5 @@ Route::get('/', function () {
 });
 
 Route::resource('users', MyUserController::class);
+Route::post('users', [MyUserController::class, 'store']);
+Route::get('users.create', [MyUserController::class, 'create']);

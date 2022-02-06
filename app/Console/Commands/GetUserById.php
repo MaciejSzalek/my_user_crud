@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Interfaces\RepositoryInterface;
 use Illuminate\Console\Command;
 
-class addUser extends Command
+class GetUserById extends Command
 {
 
     private RepositoryInterface $repository;
@@ -14,14 +14,14 @@ class addUser extends Command
      *
      * @var string
      */
-    protected $signature = 'add:user {name} {email} {password}';
+    protected $signature = 'user:getById {id}'; // user:get-by-id {id}
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Get user by ID';
 
     /**
      * Create a new command instance.
@@ -41,20 +41,17 @@ class addUser extends Command
      */
     public function handle()
     {
-        $data = $this->arguments();
-        if(!filter_var($data['email'], FILTER_VALIDATE_EMAIL))
-        {
-            throw new \Exception('Email not valid');
-        }
+        $id = $this->argument('id');
+        $user = $this->repository->get($id);
 
-        $user = $this->repository->findByEmail($data['email']);
         if($user)
         {
-            echo 'User with email : "' .$data['email'] . '" exists!' . PHP_EOL;
-            return 0;
+            echo 'ID: ' . $user->id . PHP_EOL;
+            echo 'Name: ' . $user->name . PHP_EOL;
+            echo 'Email: ' . $user->email . PHP_EOL;
+        } else {
+            echo 'User not found' . PHP_EOL;
         }
-
-        $this->repository->add($data);
-        return 1;
+        return 0;
     }
 }

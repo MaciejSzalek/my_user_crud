@@ -14,7 +14,7 @@ class findUserByEmail extends Command
      *
      * @var string
      */
-    protected $signature = 'get:userByEmail {email}';
+    protected $signature = 'user:getByEmail {email}';
 
     /**
      * The console command description.
